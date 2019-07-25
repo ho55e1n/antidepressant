@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="text-center">AntiDepressant Web Application</h1>
+        <br />
+        <p class="lead text-muted text-center">AntiDepressant introduces a simple framework to help people suffering from depression.</p>
+        @if (!(Context.User.Identity.IsAuthenticated))
+        {
+            <p><a href="/Account/Login" class="btn btn-primary btn-lg">Login to access this application</a></p>
+        }
+    </div>
+    <div class="col">
+        <picture>
+            <source media="(max-width: 599px)" srcset="~/Images/alone-320.jpg">
+            <source media="(min-width: 600px) and (max-width: 800px)" srcset="~/Images/alone-640.jpg">
+            <img src="~/Images/alone-1280.jpg" />
+            <alt ="Depress people feel alone">
+        </picture>
+    </div>
+    <div class="block-of-text text-justify col">
+        <div class="highlight text-info text-center">“According to the World Health Organization, depression is projected to become the second leading contributor to the global burden of disease by 2020.”</div>
+        <br />If you are here, that means you or one of your relatives suffer from depression and you would like to know how to tackle this
+        <a href="https://www.youtube.com/watch?v=XiCrniLQGYc&t=1s">big black dog.</a>
+        <br />
+        We have come up with a framework to help you ease the symptoms. Please register 
+        <a href="Account/Register">here</a> to unlock our services.
+    </div>
+</div>
+
+
+
+<style>
+
+
+    .block-of-text {
+        padding: 18px 14px;
+        background: #f2f2f2;
+        margin: 30px 0;
+    }
+    img{
+        max-width:1140px;
+    }
+
+    .highlight {
+        font-weight: bold;
+    }
+
+   
+</style\>

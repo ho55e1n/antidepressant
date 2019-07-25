@@ -1,0 +1,241 @@
+﻿@using AntiDepressantWebApplication.Models
+@model AddDiaryEntryViewModel
+@{
+    ViewBag.Title = "Diary";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+    .block-of-text {
+        padding: 18px 14px;
+        background: #f2f2f2;
+        margin: 30px 0;
+    }
+
+
+    .diary-conatiner {
+        list-style: none;
+        margin: 8px 0;
+    }
+
+    .diary {
+        list-style: none;
+        padding: 10px 8px;
+        background: #f2f2f2;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+        .diary > em {
+            text-align: right;
+            display: block;
+        }
+
+    button {
+        outline: none !important;
+    }
+</style>
+<div id="diaryEditModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Entry</h4>
+            </div>
+            <div id="diaryEditModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="diaryEditModalSaveBtn" class="btn btn-primary" data-dismiss="modal">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="diaryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Entry</h4>
+            </div>
+            <div id="diaryModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<h2>Diary</h2>
+<hr />
+
+<div class="col-md-12 block-of-text">
+    People who suffer from depression have a tendency to have thoughts flying around all the times or just have constant brain fog. Some other cases have problems with finishing tasks as one obstacle or mental block becomes more complex and difficult to deal with.
+    It grows and grows inside patient's mind and increase anxiety and mental fatigue. To overcome these thoughts and emotions we suggest using a simple but powerful method, journaling.
+    It might be silly or even difficult to write anything at the begining.If nothing comes to your mind, break the ice by writing something simple such as what food you had today or how was the weather. Over time and practice you get better at letting all your emotions out and write more fluidly.
+    <br />
+    Remember this activity has a compound effect and is not gonna solve your problems overnight like going to gym once wouldn't make you a healthy person. Try to be consistent and have a faith in the system!
+</div>
+
+@using (Html.BeginForm("Index", "Diary", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group row">
+        @Html.LabelFor(m => m.Text, new { style = "text-align: left", @class = "col-md-12 control-label" })
+        <div class="col-md-12">
+            @Html.HiddenFor(m => m.Text, new { id = "richEditorValue", @class = "form -control" })
+            <textarea style="display:none" id="richEditor"></textarea>
+            @Html.ValidationMessageFor(m => m.Text, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12" style="text-align: right">
+            <input type="submit" value="Add diary entry" class="btn btn-success" />
+        </div>
+    </div>
+
+
+    if (ViewBag.DiaryInput != null)
+    {
+        <ul style="padding:0">
+            @foreach (DiaryEntry item in ViewBag.DiaryInput)
+            {
+                <li class="diary-conatiner row" id="@item.Id">
+                    <div class="diary col-md-10">
+                        <div class="text-block" data-val="@item.Text"></div>
+
+                        <em>
+                            @item.Created.ToString("dd/MM/yyyy HH:MM")
+                        </em>
+                    </div>
+                    <div class="col-md-2">
+                        <div>
+                            <button data-id="@item.Id" type="button" class="btn btn-primary edit-diary">Edit</button>
+                            <button data-id="@item.Id" type="button" class="btn btn-danger delete-diary">Delete</button>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval");
+    <script src="https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=ee7wb2th3n1mbobu5ftaurvz5zhwt16xyhls2ek8t343yeqi"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-easy-loading@1.3.0/dist/jquery.loading.min.js"></script>
+    <script>
+
+
+
+        $(document).ready(() => {
+            tinymce.init({
+                selector: "#richEditor",
+                setup: function (editor) {
+                    editor.on('Paste Change input Undo Redo', function () {
+                        tinymce.triggerSave();
+                        $("#richEditorValue").val(encodeURI($("#richEditor").val() || ''));
+                    });
+                }
+            });
+            tinymce.init({
+                selector: "#diaryEditModalBody",
+                //setup: function (editor) {
+                //    //editor.on('Paste Change input Undo Redo', function () {
+                //    //    tinymce.triggerSave();
+                //    //    $("#richEditorValue").val(encodeURI($("#richEditor").val() || ''));
+                //    //});
+                //}
+            });
+
+            $('#richEditor').css('display', 'block');
+
+            $.each($('.text-block'), (index, textBlock) => {
+                const block = $(textBlock);
+                const html = decodeURI(block.data('val'));
+                let slicedHtml = html.split(' ').slice(0, 10).join(' ');
+                slicedHtml = slicedHtml.length > 35 ? slicedHtml.split('').slice(0, 35).join('') : slicedHtml;
+                slicedHtml += html.length > slicedHtml.length ? '<span style="font-weight:normal;font-style: normal;">...<span>' : '';
+                block.html(slicedHtml)
+
+
+                block.parent().click(() => {
+                    $('#diaryModalBody').html(html);
+                    $('#diaryModal').modal("show");
+                });
+            })
+
+            $('.edit-diary').click(event => {
+                const target = $(event.target);
+                const diaryId = target.data('id');
+                const text = $(`#${diaryId} .text-block`).data('val');
+                $('#diaryEditModalBody').data('id', diaryId);
+                tinymce.get('diaryEditModalBody').setContent(decodeURI(text));
+                $('#diaryEditModal').modal("show");
+            })
+
+            $('.delete-diary').click((event) => {
+                if (!confirm('Are you sure to delete?')) return;
+                const target = $(event.target);
+                const diaryId = target.data('id');
+                $('body').loading({});
+
+                $.ajax('/Diary/delete/' + diaryId, {
+                    method: 'POST',
+                    success: () => {
+                        $('#' + diaryId).remove();
+                        $('body').loading('stop');
+                    },
+
+                    error: err => {
+                        console.log(err);
+                        $('body').loading('stop');
+                        alert('Failed to delete');
+                    }
+                })
+            })
+
+            $('#diaryEditModalSaveBtn').click((event) => {
+                event.stopPropagation();
+                const target = $('#diaryEditModalBody');
+                const diaryId = target.data('id');
+
+                const text = tinymce.get('diaryEditModalBody').getContent();
+                if (!text || !text.trim()) {
+                    return alert('Enter few text');
+                }
+
+
+                $.ajax('/Diary/edit/' + diaryId, {
+                    method: 'POST',
+                    data: {
+                        text: encodeURI(text)
+                    },
+                    success: () => {
+                        $('#' + diaryId + ' .text-block').html(text);
+                        $('body').loading('stop');
+                        $('#diaryEditModal').modal('hide');
+                    },
+
+                    error: err => {
+                        console.log(err);
+                        $('body').loading('stop');
+                        alert('Failed to edit');
+                    }
+                })
+
+            })
+        })
+
+    </script>
+}
+
